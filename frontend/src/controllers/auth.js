@@ -7,7 +7,7 @@ const ACCESS_TOKEN_TTL  = "1h";
 const REFRESH_TOKEN_TTL = "1d";
 const ACCESS_SECRET  = process.env.JWT_ACCESS_SECRET;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
-const isProd = "development";
+const isProd = "production";
 
 function setAuthCookies(res, { accessToken, refreshToken }) {
   res.cookie("accessToken", accessToken, {
