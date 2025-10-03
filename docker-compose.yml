@@ -1,0 +1,65 @@
+version: "3.8"
+
+services:
+  mongodb_hd:
+    image: mongo:latest
+    container_name: mongo_db_hd
+    command: ["--bind_ip_all"]
+    ports:
+      - "${MONGODB_PORT}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
+      MONGO_APP_USER: ${MONGODB_APP_USER}
+      MONGO_APP_PASSWORD: ${MONGODB_APP_PASSWORD} 
+    volumes:
+      - ./mongo_init:/docker-entrypoint-initdb.d:ro
+      - ./mongo_data:/data/db
+    restart: unless-stopped
+  
+  chatbot_service_hd:
+    build:
+      context: ./chatbot
+      dockerfile: Dockerfile
+    container_name: chatbot_service_hd
+    image: chatbot_service:latest
+    ports:
+      - "${CHATSERVICE_PORT}:${CHATSERVICE_PORT}"
+    environment:
+      MONGODB_APP_USER: ${MONGODB_APP_USER}
+      MONGODB_APP_PASSWORD: ${MONGODB_APP_PASSWORD}
+      MONGODB_HOST: mongodb_hd
+      MONGODB_PORT: 27017
+      MONGODB_DB_NAME: ${DB_NAME}
+      PORT: ${CHATSERVICE_PORT}
+      MODEL_NAME: ${MODEL_NAME}
+      API_KEYS: ${API_KEYS}
+    restart: unless-stopped
+    depends_on:
+      - mongodb_hd
+  
+  frontend_service_hd:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend_service_hd
+    image: frontend_service:latest
+    ports:
+      - "${FRONTENDSERVICE_PORT}:${FRONTENDSERVICE_PORT}"
+    environment:
+      MONGODB_APP_USER: ${MONGODB_APP_USER}
+      MONGODB_APP_PASSWORD: ${MONGODB_APP_PASSWORD}
+      MONGODB_HOST: mongodb_hd
+      MONGODB_PORT: 27017
+      MONGODB_DB_NAME: ${DB_NAME}
+      PORT: ${FRONTENDSERVICE_PORT}
+      CHAT_SERVICE_URL: "http://chatbot_service_hd:${CHATSERVICE_PORT}"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+    restart: unless-stopped
+    depends_on:
+      - chatbot_service_hd
+
+
+

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ChatBot Page - ADS</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"/>
+  <link href="/css/chatbot.css" rel="stylesheet"/>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Conversation list">
+      <div class="brand">
+        <div class="brand-logo ads-brand" id="brandLogo">
+          <a class="brand-badge" href="/">ADS</a>
+          <span class="brand-text">CHATBOT</span>
+          <button class="new-btn" id="newChatBtn">New</button>
+        </div>
+      </div>
+
+      <div id="authArea" aria-live="polite"></div>
+      
+      <div id="authPanel" role="dialog" aria-modal="false" aria-hidden="true">
+        <div id="authError" aria-live="assertive"></div>
+        <form id="authForm">
+          <input id="authUsername" placeholder="Username" autocomplete="username" required />
+          <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password" required />
+          <div class="row">
+            <button type="submit" class="auth-btn" id="authSubmit">Login</button>
+            <button type="button" class="auth-btn" id="switchMode">Sign up</button>
+          </div>
+          <div class="small">Mode: <span id="authMode">login</span></div>
+        </form>
+        </div>
+      <div class="conversations" id="conversations" role="list"></div>
+    </aside>
+
+    <main class="content" id="content">
+      <div class="home" id="homeView" style="display:none">
+        <div class="hero">
+          <h1>ChatBot Application</h1>
+          <p class="muted">Supporting advanced information search on dietary supplements from Chemist Warehouse, Chemist Outlet, etc</p>
+          <div class="input-row" style="margin: top 1%;">
+            <textarea id="homeInput" placeholder="Enter question..." style="display: none;"></textarea>
+            <button class="send" id="homeSend" style="display: none;">Send</button>
+          </div>
+        </div>
+      </div>
+      <div class="chat-shell" id="chatShell" style="display:none">
+        <div class="chat-header">
+          <h2 id="chatTitle">Conversation</h2>
+          <div class="muted" id="chatSubtitle">...</div>
+        </div>
+        <div class="chat-area" id="chatArea"></div>
+        <form class="chat-input" id="chatInputRow">
+          <textarea id="chatInput" placeholder="Enter message..." required></textarea>
+          <button id="chatSend">Send</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/chatbot.js"></script>
+</body>
+</html>
