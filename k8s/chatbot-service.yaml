@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot-hd
+  labels:
+    app: chatbot
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: chatbot
+  template:
+    metadata:
+      labels:
+        app: chatbot
+    spec:
+      containers:
+        - image: chatbot_service:latest
+          name: chatbot-service-hd
+          imagePullPolicy: Never
+          resources:
+            requests:
+              cpu: 100m
+              memory: 300Mi
+            limits:
+              cpu: 100m
+              memory: 300Mi
+          ports:
+            - containerPort: 3030
+          # readinessProbe:
+          #   periodSeconds: 10
+          #   httpGet:
+          #     path: /
+          #     port: http
+          env:
+            - name: MONGODB_APP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: MONGODB_APP_USER
+            - name: MONGODB_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: MONGODB_APP_PASSWORD
+            - name: MONGODB_HOST
+              value: mongodb-hd
+            - name: MONGODB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ads-config-hd
+                  key: MONGODB_PORT
+            - name: MONGODB_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ads-config-hd
+                  key: MONGODB_NAME
+            - name: PORT
+              value: "3030"
+            - name: MODEL_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ads-config-hd
+                  key: MODEL_NAME
+            - name: API_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: API_KEYS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chatbot-hd
+  labels:
+    app: chatbot
+spec:
+  selector:
+    app: chatbot
+  ports:
+    - protocol: TCP
+      port: 3030
+      targetPort: 3030
+      nodePort: 30200
+  type: LoadBalancer
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: chatbot-hd
+spec:
+  maxReplicas: 3
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: chatbot-hd
+  targetCPUUtilizationPercentage: 80
+status:
+  currentReplicas: 0
+  desiredReplicas: 0

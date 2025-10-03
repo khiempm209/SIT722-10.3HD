@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-hd
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend-service-hd
+          image: frontend_service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3020
+          env:
+            - name: MONGODB_APP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: MONGODB_APP_USER
+            - name: MONGODB_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: MONGODB_APP_PASSWORD
+            - name: MONGODB_HOST
+              value: mongodb-hd
+            - name: MONGODB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ads-config-hd
+                  key: MONGODB_PORT
+            - name: MONGODB_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ads-config-hd
+                  key: MONGODB_NAME
+            - name: PORT
+              value: "3020"
+            - name: CHAT_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ads-config-hd
+                  key: CHATBOT_SERVICE_URL
+            - name: JWT_ACCESS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: JWT_ACCESS_SECRET
+            - name: JWT_REFRESH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: JWT_REFRESH_SECRET
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-hd
+  labels:
+    app: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 3020
+      targetPort: 3020
+      nodePort: 30100
+  type: LoadBalancer

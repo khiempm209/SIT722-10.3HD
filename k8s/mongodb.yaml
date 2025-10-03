@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb-hd
+  labels:
+    app: mongodb
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongo-db-hd
+          image: mongo:latest
+          ports:
+            - containerPort: 20722
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: MONGO_INITDB_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: MONGO_INITDB_ROOT_PASSWORD
+            - name: MONGO_APP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: MONGODB_APP_USER
+            - name: MONGO_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: MONGODB_APP_PASSWORD
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: ads-config-hd
+                  key: MONGODB_NAME
+          args: ["--bind_ip_all"]
+          volumeMounts:
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+      volumes:
+        - name: init-scripts
+          configMap:
+            name: mongo-init-scripts
+            defaultMode: 0755
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-persistent-storage
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100M
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-hd
+  labels:
+    app: mongodb
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - protocol: TCP
+      port: 20722
+      targetPort: 27017
+      nodePort: 30300
+  type: LoadBalancer

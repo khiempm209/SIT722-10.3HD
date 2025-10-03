@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ads-config-hd
+data:
+  # Database Names
+  MONGODB_NAME: SIT722HD
+  MONGODB_PORT: "20722"
+  COLLECTION_ITEM_NAME: items
+  COLLECTION_ITEM_LI_NAME: items_li
+  COLLECTION_CHAT_NAME: conversations
+
+  MODEL_NAME: gemini-2.0-flash
+  MONGO_DB_HOST: mongodb-service-hd
+  CHATBOT_SERVICE_URL: http://chatbot-hd:3030
