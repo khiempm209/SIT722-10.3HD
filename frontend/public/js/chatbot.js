@@ -460,6 +460,7 @@ window.addEventListener("popstate", (e) => {
 });
 
 (async function init() {
+  
   await getCredential();
   renderAuthArea();
   socket = io();

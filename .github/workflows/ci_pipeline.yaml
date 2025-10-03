@@ -64,7 +64,7 @@ jobs:
         docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/chatbot_service:prod
 
     # Build and Push Docker image for Frontend Service
-    - name: Build and Push Order Service Image
+    - name: Build and Push Frontend Service Image
       run: |
         docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/frontend_service:prod ./frontend/
         docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/frontend_service:prod

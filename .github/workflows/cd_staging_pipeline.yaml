@@ -1,0 +1,126 @@
+name: Staging pipeline - Deploy the application to the staging infrastructure
+
+on:
+  workflow_dispatch:
+
+  workflow_run:
+    workflows: ["CI pipeline - Test, Build and Push Backend Images to ACR"]
+    types:
+      - completed
+    branches:
+      - testing
+  
+
+jobs:
+  deploy_application_staging_env:
+    runs-on: ubuntu-latest
+    environment: Staging
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: testing
+          fetch-depth: 0
+      
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Terraform Init/PLan/Apply - Initialize the Staging AKS
+        run: |
+          cd terraform
+          terraform init -input=false
+          terraform plan -input=false -no-color
+          terraform apply -auto-approve
+
+      - name: Set Kubernetes context (get AKS credentials)
+        run: |
+          az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name sit722pmkstaging --overwrite-existing
+
+      - name: Attach ACR
+        run: |
+          az aks update --name sit722pmkstaging --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --attach-acr ${{ secrets.AZURE_CONTAINER_REGISTRY_NAME }}
+
+      - name: Deploy components to the staging AKS
+        run: |
+          echo "Deploying backend infrastructure..."
+          cd k8s/
+          kubectl apply -f configmaps.yaml
+          kubectl apply -f configs-mongodb.yaml
+          kubectl apply -f secrets.yaml
+          kubectl apply -f mongodb.yaml
+          kubectl apply -f chatbot-service.yaml
+          kubectl apply -f frontend.yaml
+
+      - name: Wait for the MongoDB and Frontend LoadBalancer IPs
+        run: |
+          echo "Waiting for the MongoDB and Frontend LoadBalancer IPs to be assigned..."
+          MONGO_DB_IP=""
+          FRONTEND_IP=""
+
+          for i in $(seq 1 60); do
+            echo "Attempt $i/60 to get the IPs..."
+            MONGO_DB_IP=$(kubectl get service mongodb-hd -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+            FRONTEND_IP=$(kubectl get service frontend-hd -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+            if [[ -n "$MONGO_DB_IP" && -n "$FRONTEND_IP" ]]; then
+              echo "The MongoDB IP and Frontend IP assigned!"
+              echo "MONGODB IP: $MONGO_DB_IP"
+              echo "FRONTEND IP: $FRONTEND_IP"
+              break
+            fi
+            sleep 5
+          done
+          
+          if [[ -z "$MONGO_DB_IP" || -z "$FRONTEND_IP" ]]; then
+            echo "Error: The MongoDB or Frontend LoadBalancer IP is not assigned after timeout."
+            exit 1
+          fi
+          
+          # These are environment variables for subsequent steps in the *same job*
+          # And used to set the job outputs
+          echo "MONGO_DB_IP=$MONGO_DB_IP" >> $GITHUB_ENV
+          echo "FRONTEND_IP=http://$FRONTEND_IP:3020" >> $GITHUB_ENV
+      
+      - name: Push data into the MongoDB in the staging AKS
+        run: |
+          cd data_seeding
+          pip install -r requirements.txt
+          python init_db.py --mongodb-host ${{ env.MONGO_DB_IP }}  --mongodb-port 20722 --db-name "SIT722HD" --collection-item-name "items" --collection-item-li-name "items_li" --mongodb-app-user ${{ fromJSON(secrets.MONGODB_CONNECTION).MONGODB_APP_USER }} --mongodb-app-password ${{ fromJSON(secrets.MONGODB_CONNECTION).MONGODB_APP_PASSWORD }}
+      
+      - name: Inject the Frontend IP into the selinium_test.py
+        run: |
+          echo "Injecting the Frontend IP into test/selenium_acceptance_test.py"
+          echo "${{ env.FRONTEND_IP }}"
+          sed -i "s|_FRONTEND_SERVICE_URL_|${{ env.FRONTEND_IP }}|g" test/selenium_acceptance_test.py
+          
+          # Display the modified file content for debugging
+          echo "--- Modified elenium_acceptance_test.py content ---"
+          cat test/selenium_acceptance_test.py
+          echo "---------------------------------"
+      
+      - name: Simple acceptance test
+        run: |
+          cd test
+          pip install -r requirements.txt
+          pytest -q selenium_acceptance_test.py
+
+      - name: Terraform Destroy - Destroy the Staging AKS
+        run: |
+          cd terraform
+          terraform destroy -auto-approve
+        if: always()
+      
+      - name: Logout from Azure 
+        run: az logout
+        if: always()

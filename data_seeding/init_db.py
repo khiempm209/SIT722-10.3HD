@@ -35,8 +35,6 @@ def initialize_database(connection):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('--mongodb-user', type=str, required=True)
-    parser.add_argument('--mongodb-password', type=str, required=True)
     parser.add_argument('--mongodb-host', type=str, required=True)
     parser.add_argument('--mongodb-port', type=str, required=True)
     parser.add_argument('--db-name', type=str, required=True)
@@ -47,8 +45,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     mongo_connection = {
-        'MONGO_ROOT_USER': args.mongodb_user,
-        'MONGO_ROOT_PASSWOORD': args.mongodb_password,
         'MONGO_HOST': args.mongodb_host,
         'MONGO_PORT': int(args.mongodb_port),
         'DB_NAME': args.db_name,
