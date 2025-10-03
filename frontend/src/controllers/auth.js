@@ -148,10 +148,13 @@ exports.me = async (req, res) => {
     const token = req.cookies?.accessToken;
     if (token) {
       try {
+        console.log("Token: ", token);
         const payload = jwt.verify(token, ACCESS_SECRET);
         const meCheck = await Users.findById(payload.sub)
           .select("username refreshTokenId")
           .lean();
+        
+        console.log("meCheck: ", meCheck);
 
         if (meCheck) {
           const un = meCheck.username?.trim() || "";

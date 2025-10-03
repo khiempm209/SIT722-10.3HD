@@ -15,8 +15,10 @@ spec:
         app: chatbot
     spec:
       containers:
-        - image: sit722pmk.azurecr.io/chatbot_service:prod
-          name: chatbot-service-hd
+        - name: chatbot-service-hd
+          image: sit722pmk.azurecr.io/chatbot_service:prod
+          # image: chatbot_service:latest
+          # imagePullPolicy: Never
           imagePullPolicy: Always
           resources:
             requests:

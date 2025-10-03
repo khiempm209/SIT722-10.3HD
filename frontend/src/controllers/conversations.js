@@ -49,6 +49,7 @@ exports.findConversationsByUser = async (req, res) => {
         const userConversations = await Conversations.find({ user_id: user_id.toString() }).sort({ edit_time: -1 }).select("id edit_time name history");
         res.status(200).json(userConversations);
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: 'Cannot find the conversation', error: error.message });
     }
 };
