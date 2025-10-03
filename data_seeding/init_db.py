@@ -43,7 +43,7 @@ if __name__ == "__main__":
     parser.add_argument('--mongodb-app-user', type=str, required=True)
     parser.add_argument('--mongodb-app-password', type=str, required=True)
     args = parser.parse_args()
-
+    print(args.mongodb_app_user)
     mongo_connection = {
         'MONGO_HOST': args.mongodb_host,
         'MONGO_PORT': int(args.mongodb_port),
