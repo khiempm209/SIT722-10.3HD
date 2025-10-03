@@ -115,11 +115,11 @@ jobs:
           pip install -r requirements.txt
           pytest -q selenium_acceptance_test.py
 
-      # - name: Terraform Destroy - Destroy the Staging AKS
-      #   run: |
-      #     cd terraform
-      #     terraform destroy -auto-approve
-      #   if: always()
+      - name: Terraform Destroy - Destroy the Staging AKS
+        run: |
+          cd terraform
+          terraform destroy -auto-approve
+        if: always()
       
       - name: Logout from Azure 
         run: az logout

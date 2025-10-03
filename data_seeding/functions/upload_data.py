@@ -9,6 +9,7 @@ def get_client(connection):
                          username=connection['MONGO_APP_USER'], password=connection['MONGO_APP_PASSWORD'], 
                          authSource=connection['DB_NAME'],
                          connectTimeoutMS=120000)
+    print(connection['MONGO_HOST'], connection['MONGO_PORT'], connection['MONGO_APP_USER'],connection['MONGO_APP_PASSWORD'], connection['DB_NAME'])
     return client
 
 def bulk_insert_stream(list_items, connection, collection, batch_size=1000):
