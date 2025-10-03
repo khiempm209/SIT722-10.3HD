@@ -1,7 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const path = require("path");
 const Users = require("../models/Users");
 
 const ACCESS_TOKEN_TTL  = "1h";
@@ -52,8 +51,8 @@ function newJti() {
 /* ---------------- Actions ---------------- */
 exports.signup = async (req, res) => {
   try {
-    const username = req.body.username;
-    const password = req.body.password;
+    const username = req.body.username.toString();
+    const password = req.body.password.toString();
 
     if (!username || !password)
       return res.status(400).send("All fields required.");
@@ -68,15 +67,15 @@ exports.signup = async (req, res) => {
     });
 
     return res.status(200).send("Signup successfully");
-  } catch (_err) {
-    console.log(_err)
+  } catch (error_) {
+    console.log(error_)
     return res.status(500).send("Internal server error during signup.");
   }
 };
 
 exports.login = async (req, res) => {
   try {
-    const username = req.body.username;
+    const username = req.body.username.toString();
     const user = await Users.findOne({ $or: [{ username }, { username: username }] });
     if (!user) return res.status(404).send("User not found.");
 
@@ -92,8 +91,8 @@ exports.login = async (req, res) => {
     setAuthCookies(res, { accessToken, refreshToken });
 
     return res.status(200).send("Login Successfully");
-  } catch (_err) {
-    console.log("Error: ", _err);
+  } catch (error_) {
+    console.log("Error: ", error_);
     return res.status(500).send("Internal server error during login.");
   }
 };
@@ -159,8 +158,8 @@ exports.me = async (req, res) => {
           username = un || "User";
           jti      = meCheck.refreshTokenId || null;
         }
-      } catch (_) {
-        // ignore; will send defaults
+      } catch (error_) {
+        console.log(error_)
       }
     }
 

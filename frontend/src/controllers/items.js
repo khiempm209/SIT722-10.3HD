@@ -1,17 +1,16 @@
 const Items = require("../models/Items");
+const escapeStringRegexp = require('escape-string-regexp');
 
 exports.itemsSearch = async (req, res) => {
   const q = (req.query.q || "").trim();
   const limit = Math.max(
     1,
-    Math.min(parseInt(req.query.limit || "200", 10), 2000)
+    Math.min(Number.parseInt(req.query.limit || "200", 10), 2000)
   );
   if (!q) return res.json([]);
 
   try {
-    // Basic case-insensitive regex search on common fields
-    const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-    // console.log(rx)
+    const rx = new RegExp(escapeStringRegexp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), "i");
     const docs = await Items.aggregate(
       [
         {
@@ -47,13 +46,11 @@ exports.itemsSearchById = async (req, res) => {
     const itemId = (req.query.id || "").trim();
     if (!itemId) return res.json([]);
     const item = await Items.findOne({ id: itemId });
-    // console.log(item);
     if (!item) {
       return res.status(404).json({ message: "Cannot find this item" });
     }
     if (!item.brand) return res.status(200).json({ item: item, similarItems: [] });
     const originalCategories = Array.isArray(item.categories) ? item.categories : [];
-    // console.log(originalCategories);
     const similarItems = await Items.aggregate([
       { $match: { id: { $ne: item.id } } },
       { $addFields: {
