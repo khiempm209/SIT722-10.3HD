@@ -17,7 +17,7 @@ spec:
       containers:
         - image: sit722pmk.azurecr.io/chatbot_service:prod
           name: chatbot-service-hd
-          imagePullPolicy: Never
+          imagePullPolicy: Always
           resources:
             requests:
               cpu: 100m

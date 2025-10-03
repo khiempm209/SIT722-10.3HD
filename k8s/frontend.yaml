@@ -17,7 +17,7 @@ spec:
       containers:
         - name: frontend-service-hd
           image: sit722pmk.azurecr.io/frontend_service:prod
-          imagePullPolicy: Never
+          imagePullPolicy: Always
           ports:
             - containerPort: 3020
           env:

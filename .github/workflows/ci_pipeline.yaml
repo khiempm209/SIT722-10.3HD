@@ -38,47 +38,41 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       
-      - name: "SonarQube Quality Gate Status value"
-        run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
+      # - name: "SonarQube Quality Gate Status value"
+      #   run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
 
-  # # Job 2: Build and Push Docker Images (runs only if tests pass)
-  # build_and_push_images:
-  #   runs-on: ubuntu-latest
-  #   needs: test_and_lint_backends
+  # Job 2: Build and Push Docker Images
+  build_and_push_images:
+    runs-on: ubuntu-latest
+    needs: test_and_lint_backends
 
-  #   steps:
-  #   - name: Checkout repository
-  #     uses: actions/checkout@v4
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-  #   # Azure login using a Service Principal secret
-  #   - name: Azure Login
-  #     uses: azure/login@v1
-  #     with:
-  #       creds: ${{ secrets.AZURE_CREDENTIALS }}
+    # Azure login using a Service Principal secret
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-  #   # Login to Azure Container Registry (ACR)
-  #   - name: Login to Azure Container Registry
-  #     run: az acr login --name ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+    # Login to Azure Container Registry (ACR)
+    - name: Login to Azure Container Registry
+      run: az acr login --name ${{ secrets.AZURE_CONTAINER_REGISTRY }}
 
-  #   # Build and Push Docker image for Product Service
-  #   - name: Build and Push Product Service Image
-  #     run: |
-  #       docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/week10_product_service:latest ./backend/product_service/
-  #       docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/week10_product_service:latest
+    # Build and Push Docker image for Product Service
+    - name: Build and Push Chatbot Image
+      run: |
+        docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/chatbot_service:prod ./chatbot/
+        docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/chatbot_service:prod
 
-  #   # Build and Push Docker image for Order Service
-  #   - name: Build and Push Order Service Image
-  #     run: |
-  #       docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/week10_order_service:latest ./backend/order_service/
-  #       docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/week10_order_service:latest
-    
-  #   # Build and Push Docker image for Customer Service
-  #   - name: Build and Push Customer Service Image
-  #     run: |
-  #       docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/week10_customer_service:latest ./backend/customer_service/
-  #       docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/week10_customer_service:latest
+    # Build and Push Docker image for Frontend Service
+    - name: Build and Push Order Service Image
+      run: |
+        docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/frontend_service:prod ./frontend/
+        docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/frontend_service:prod
 
-  #   # Logout from Azure for security (runs even if image push fails)
-  #   - name: Logout from Azure
-  #     run: az logout
-  #     if: always()
+    # Logout from Azure for security (runs even if image push fails)
+    - name: Logout from Azure
+      run: az logout
+      if: always()
