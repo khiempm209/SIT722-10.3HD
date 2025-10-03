@@ -12,7 +12,6 @@ on:
       - '.github/workflows/ci_pipeline.yml' 
 
 env:
-  ACR_LOGIN_SERVER: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
 
 jobs:
   sonar-qube-scan:
