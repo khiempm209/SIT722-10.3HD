@@ -96,7 +96,7 @@ jobs:
         run: |
           cd data_seeding
           pip install -r requirements.txt
-          python init_db.py --mongodb-host ${{ env.MONGO_DB_IP }}  --mongodb-port 20722 --db-name "SIT722HD" --collection-item-name "items" --collection-item-li-name "items_li" --mongodb-app-user ${{ fromJSON(secrets.MONGODB_CONNECTION).MONGODB_APP_USER }} --mongodb-app-password ${{ fromJSON(secrets.MONGODB_CONNECTION).MONGODB_APP_PASSWORD }}
+          python init_db.py --mongodb-host ${{ env.MONGO_DB_IP }}  --mongodb-port 20722 --db-name "SIT722HD" --collection-item-name "items" --collection-item-li-name "items_li" --mongodb-app-user ${{ secrets.MONGODB_APP_USER }} --mongodb-app-password ${{ secrets.MONGODB_APP_PASSWORD }}
       
       - name: Inject the Frontend IP into the selinium_test.py
         run: |
