@@ -38,6 +38,22 @@ let socket = null;
 let mode = "login"; // or 'signup'
 let panelOpen = false;
 
+function customRandomUUID() {
+  const data = new Uint8Array(16);
+  crypto.getRandomValues(data);
+  data[6] = (data[6] & 0x0f) | 0x40; 
+  data[8] = (data[8] & 0x3f) | 0x80;
+  let uuid = '';
+  for (let i = 0; i < 16; i++) {
+    const hex = data[i].toString(16).padStart(2, '0');
+    uuid += hex;
+    if (i === 3 || i === 5 || i === 7 || i === 9) {
+      uuid += '-';
+    }
+  }
+  return uuid;
+}
+
 async function getCredential(){
   try {
     const res = await fetch(`${CRUD_SERVICE_URL}/api/me`, { credentials: 'include' });
@@ -395,7 +411,7 @@ function goHome(push = true) {
 
 // create new conversation and optionally send initial message
 function createConversation(initialText) {
-  const id = crypto.randomUUID();
+  const id = customRandomUUID();
   const now = new Date();
   const timeStr = now.toLocaleString();
   const name = initialText
