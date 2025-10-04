@@ -9,7 +9,7 @@ on:
     paths: 
       - 'frontend/**'
       - 'chatbot/**'
-      - '.github/workflows/ci_pipeline.yml' 
+      - '.github/workflows/ci_pipeline.yaml' 
 ###
 jobs:
   sonar-qube-scan:
