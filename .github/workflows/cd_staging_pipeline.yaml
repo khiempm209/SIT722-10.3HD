@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   workflow_run:
-    workflows: ["CI pipeline - Test, Build and Push Backend Images to ACR"]
+    workflows: ["CI pipeline - Test, Build and Push Backend/frontend Images to ACR"]
     types:
       - completed
     branches:
