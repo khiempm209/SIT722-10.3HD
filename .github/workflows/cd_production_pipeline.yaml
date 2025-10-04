@@ -7,8 +7,6 @@ on:
     branches:
       - main
     paths:
-      - 'backend/**'
-      - 'frontend/**'
 
 jobs:
   deploy_frontend:
