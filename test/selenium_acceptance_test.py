@@ -77,11 +77,13 @@ def test_chatbot_message(driver):
     bot_message_text = "supplements"
     home_input = driver.find_element(By.ID, "homeInput")
     assert home_input is not None, ("The website does not have the home input")
+    time.sleep(3)
     home_input.send_keys(first_message)
     time.sleep(1)
     home_button = driver.find_element(By.ID, "homeSend")
     assert home_button is not None, ("The website does not have the home button for sending messages")
     # home_button.click()
+    time.sleep(1)
     driver.execute_script("arguments[0].click();", home_button)
     time.sleep(8)
     first_user_message = driver.find_elements(By.CSS_SELECTOR, ".message")[0]
@@ -93,9 +95,11 @@ def test_chatbot_message(driver):
            ("Problem with the first bot message - text")
     chat_input = driver.find_element(By.ID, "chatInput")
     assert chat_input is not None, ("The website does not have the chat input")
+    time.sleep(3)
     chat_input.send_keys(second_message)
     chat_button = driver.find_element(By.ID, "chatSend")
     assert chat_button is not None, ("The website does not have the chat button for sending messages")
+    time.sleep(2)
     chat_button.click()
     time.sleep(8)
     second_user_message = driver.find_elements(By.CSS_SELECTOR, ".message")[2]
