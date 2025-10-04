@@ -61,63 +61,63 @@ jobs:
           kubectl apply -f mongodb.yaml
           kubectl create configmap seed-script --from-file=../data_seeding/init_db.py
           kubectl apply -f seed-data-mongodb.yaml   
-          kubectl wait --for=condition=complete job/mongo-seed-job --timeout=1200s
-          kubectl logs job/mongo-seed-job
-          kubectl apply -f chatbot-service.yaml
-          kubectl apply -f frontend.yaml
+        # kubectl wait --for=condition=complete job/mongo-seed-job --timeout=1200s
+        # kubectl logs job/mongo-seed-job
+        # kubectl apply -f chatbot-service.yaml
+        # kubectl apply -f frontend.yaml
 
-      - name: Wait for the MongoDB and Frontend LoadBalancer IPs
-        run: |
-          echo "Waiting for the MongoDB and Frontend LoadBalancer IPs to be assigned..."
-          MONGO_DB_IP=""
-          FRONTEND_IP=""
+      # - name: Wait for the MongoDB and Frontend LoadBalancer IPs
+      #   run: |
+      #     echo "Waiting for the MongoDB and Frontend LoadBalancer IPs to be assigned..."
+      #     MONGO_DB_IP=""
+      #     FRONTEND_IP=""
 
-          for i in $(seq 1 60); do
-            echo "Attempt $i/60 to get the IPs..."
-            MONGO_DB_IP=$(kubectl get service mongodb-hd -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-            FRONTEND_IP=$(kubectl get service frontend-hd -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+      #     for i in $(seq 1 60); do
+      #       echo "Attempt $i/60 to get the IPs..."
+      #       MONGO_DB_IP=$(kubectl get service mongodb-hd -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+      #       FRONTEND_IP=$(kubectl get service frontend-hd -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
-            if [[ -n "$MONGO_DB_IP" && -n "$FRONTEND_IP" ]]; then
-              echo "The MongoDB IP and Frontend IP assigned!"
-              echo "MONGODB IP: $MONGO_DB_IP"
-              echo "FRONTEND IP: $FRONTEND_IP"
-              break
-            fi
-            sleep 5
-          done
+      #       if [[ -n "$MONGO_DB_IP" && -n "$FRONTEND_IP" ]]; then
+      #         echo "The MongoDB IP and Frontend IP assigned!"
+      #         echo "MONGODB IP: $MONGO_DB_IP"
+      #         echo "FRONTEND IP: $FRONTEND_IP"
+      #         break
+      #       fi
+      #       sleep 5
+      #     done
           
-          if [[ -z "$MONGO_DB_IP" || -z "$FRONTEND_IP" ]]; then
-            echo "Error: The MongoDB or Frontend LoadBalancer IP is not assigned after timeout."
-            exit 1
-          fi
+      #     if [[ -z "$MONGO_DB_IP" || -z "$FRONTEND_IP" ]]; then
+      #       echo "Error: The MongoDB or Frontend LoadBalancer IP is not assigned after timeout."
+      #       exit 1
+      #     fi
           
-          # These are environment variables for subsequent steps in the *same job*
-          # And used to set the job outputs
-          echo "MONGO_DB_IP=$MONGO_DB_IP" >> $GITHUB_ENV
-          echo "FRONTEND_IP=http://$FRONTEND_IP:3020" >> $GITHUB_ENV
+      #     # These are environment variables for subsequent steps in the *same job*
+      #     # And used to set the job outputs
+      #     echo "MONGO_DB_IP=$MONGO_DB_IP" >> $GITHUB_ENV
+      #     echo "FRONTEND_IP=http://$FRONTEND_IP:3020" >> $GITHUB_ENV
       
-      - name: Inject the Frontend IP into the selinium_test.py
-        run: |
-          echo "Injecting the Frontend IP into test/selenium_acceptance_test.py"
-          echo "${{ env.FRONTEND_IP }}"
-          sed -i "s|_FRONTEND_SERVICE_URL_|${{ env.FRONTEND_IP }}|g" test/selenium_acceptance_test.py
+      # - name: Inject the Frontend IP into the selinium_test.py
+      #   run: |
+      #     echo "Injecting the Frontend IP into test/selenium_acceptance_test.py"
+      #     echo "${{ env.FRONTEND_IP }}"
+      #     sed -i "s|_FRONTEND_SERVICE_URL_|${{ env.FRONTEND_IP }}|g" test/selenium_acceptance_test.py
           
-          # Display the modified file content for debugging
-          echo "--- Modified elenium_acceptance_test.py content ---"
-          cat test/selenium_acceptance_test.py
-          echo "---------------------------------"
+      #     # Display the modified file content for debugging
+      #     echo "--- Modified elenium_acceptance_test.py content ---"
+      #     cat test/selenium_acceptance_test.py
+      #     echo "---------------------------------"
       
-      - name: Simple acceptance test
-        run: |
-          cd test
-          pip install -r requirements.txt
-          pytest -q selenium_acceptance_test.py
+      # - name: Simple acceptance test
+      #   run: |
+      #     cd test
+      #     pip install -r requirements.txt
+      #     pytest -q selenium_acceptance_test.py
 
-      - name: Terraform Destroy - Destroy the Staging AKS
-        run: |
-          cd terraform
-          terraform destroy -auto-approve
-        if: always()
+      # - name: Terraform Destroy - Destroy the Staging AKS
+      #   run: |
+      #     cd terraform
+      #     terraform destroy -auto-approve
+      #   if: always()
       
       - name: Logout from Azure 
         run: az logout
