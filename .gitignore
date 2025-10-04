@@ -19,3 +19,8 @@ Thumbs.db
 # Editors
 .vscode/
 .idea/
+
+# cache
+__pycache__
+.pytest_cache
+

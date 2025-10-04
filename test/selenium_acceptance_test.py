@@ -6,7 +6,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import tempfile
 
-BASE_URL = "_FRONTEND_SERVICE_URL_"
+# BASE_URL = "_FRONTEND_SERVICE_URL_"
+BASE_URL = "http://4.198.87.27:3020"
 first_message, second_message = "Hello", "Give me some information about Blackmore products"
 test_account_username = "test_account"
 test_account_password = "test_account"
@@ -15,7 +16,8 @@ test_account_password = "test_account"
 @pytest.fixture(scope="module")
 def driver():
     options = webdriver.ChromeOptions()
-    options.add_argument("--start-maximized")
+    options.add_argument("--window-size=1920,1080")
+    # options.add_argument("--start-maximized")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-features=PasswordLeakDetection,PasswordManagerOnboarding")

@@ -59,12 +59,13 @@ jobs:
           kubectl apply -f secrets.yaml
           kubectl apply -f configs-mongodb.yaml
           kubectl apply -f mongodb.yaml
+          kubectl wait --for=condition=ready pods/mongodb-hd-0 --timeout=1200s
           kubectl create configmap seed-script --from-file=../data_seeding/init_db.py
-        # kubectl apply -f seed-data-mongodb.yaml   
-        # kubectl wait --for=condition=complete job/mongo-seed-job --timeout=1200s
-        # kubectl logs job/mongo-seed-job
-        # kubectl apply -f chatbot-service.yaml
-        # kubectl apply -f frontend.yaml
+          kubectl apply -f seed-data-mongodb.yaml   
+          kubectl wait --for=condition=complete job/mongo-seed-job --timeout=1200s
+          kubectl logs job/mongo-seed-job
+          kubectl apply -f chatbot-service.yaml
+          kubectl apply -f frontend.yaml
 
       # - name: Wait for the MongoDB and Frontend LoadBalancer IPs
       #   run: |
