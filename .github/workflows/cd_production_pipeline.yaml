@@ -8,8 +8,6 @@ on:
       - main
     paths:
 
-###
-
 jobs:
   deploy_frontend:
     runs-on: ubuntu-latest
