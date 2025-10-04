@@ -69,6 +69,7 @@ def test_login(driver):
     assert driver.find_element(By.ID, "authArea").find_elements(By.CLASS_NAME, "auth-username")[0],  ("The login process failed")
     assert driver.find_element(By.ID, "authArea").find_elements(By.CLASS_NAME, "auth-username")[0].text == test_account_username,  ("Wrong username displayed")
     assert driver.find_element(By.ID, "homeInput").value_of_css_property("display") == "block",  ("The text area does not appear after the login process")
+    time.sleep(15)
 
 
     
