@@ -1,3 +1,4 @@
-pymongo==4.14.1
 selenium
+pytest
+webdriver-manager
 
