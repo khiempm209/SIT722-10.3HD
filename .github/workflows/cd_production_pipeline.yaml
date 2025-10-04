@@ -1,0 +1,52 @@
+name: Production pipeline - Deploy Application to the production infrastructure
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+
+jobs:
+  deploy_frontend:
+    runs-on: ubuntu-latest
+    environment: Production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set Kubernetes context (get AKS credentials)
+        run: |
+          az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AZURE_KUBERNETES_CLUSTER }} --overwrite-existing
+
+      - name: Deploy components to the production AKS
+        run: |
+          echo "Deploying backend infrastructure..."
+          cd k8s/
+          kubectl apply -f configmaps.yaml
+          kubectl apply -f secrets.yaml
+          kubectl apply -f configs-mongodb.yaml
+          kubectl apply -f mongodb.yaml
+          kubectl wait --for=condition=ready pods/mongodb-hd-0 --timeout=1200s
+          kubectl create configmap seed-script --from-file=../data_seeding/init_db.py
+          kubectl apply -f seed-data-mongodb.yaml   
+          kubectl wait --for=condition=complete job/mongo-seed-job --timeout=1200s
+          kubectl logs job/mongo-seed-job
+          kubectl apply -f chatbot-service.yaml
+          kubectl apply -f frontend.yaml
+      
+      - name: Logout from Azure 
+        run: az logout
+        if: always()
+        
