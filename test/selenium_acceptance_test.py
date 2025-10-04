@@ -6,8 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import tempfile
 
-# BASE_URL = "_FRONTEND_SERVICE_URL_"
-BASE_URL = "http://4.198.87.27:3020"
+BASE_URL = "_FRONTEND_SERVICE_URL_"
 first_message, second_message = "Hello", "Give me some information about Blackmore products"
 test_account_username = "test_account"
 test_account_password = "test_account"
