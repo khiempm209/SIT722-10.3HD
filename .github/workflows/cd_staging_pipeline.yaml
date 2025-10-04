@@ -59,6 +59,9 @@ jobs:
           kubectl apply -f configs-mongodb.yaml
           kubectl apply -f secrets.yaml
           kubectl apply -f mongodb.yaml
+          kubectl create configmap seed-script --from-file=../data_seeding/init_db.py
+          kubectl apply -f seed-data-mongodb.yaml   
+          kubectl wait --for=condition=complete job/mongo-seed-job --timeout=1200s
           kubectl apply -f chatbot-service.yaml
           kubectl apply -f frontend.yaml
 
@@ -91,12 +94,6 @@ jobs:
           # And used to set the job outputs
           echo "MONGO_DB_IP=$MONGO_DB_IP" >> $GITHUB_ENV
           echo "FRONTEND_IP=http://$FRONTEND_IP:3020" >> $GITHUB_ENV
-      
-      - name: Push data into the MongoDB in the staging AKS
-        run: |
-          cd data_seeding
-          pip install -r requirements.txt
-          python init_db.py --mongodb-host ${{ env.MONGO_DB_IP }}  --mongodb-port 20722 --db-name "SIT722HD" --collection-item-name "items" --collection-item-li-name "items_li" --mongodb-app-user ${{ secrets.MONGODB_APP_USER }} --mongodb-app-password ${{ secrets.MONGODB_APP_PASSWORD }}
       
       - name: Inject the Frontend IP into the selinium_test.py
         run: |

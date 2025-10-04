@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongo-seed-job
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: seed-data
+          image: python:3.10-slim-buster
+          env:
+            - name: AZURE_STORAGE_ACCOUNT_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ads-config-hd
+                  key: AZURE_STORAGE_ACCOUNT_NAME
+            - name: AZURE_STORAGE_CONTAINER_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ads-config-hd
+                  key: AZURE_STORAGE_CONTAINER_NAME
+            - name: AZURE_STORAGE_ACCOUNT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: AZURE_STORAGE_ACCOUNT_KEY 
+            - name: AZURE_SAS_TOKEN_EXPIRY_HOURS
+              valueFrom:
+                configMapKeyRef:
+                  name: ads-config-hd
+                  key: AZURE_SAS_TOKEN_EXPIRY_HOURS
+            - name: MONGODB_HOST
+              value: mongodb-hd
+            - name: MONGODB_APP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: MONGODB_APP_USER
+            - name: MONGODB_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ads-secrets-hd
+                  key: MONGODB_APP_PASSWORD
+  
+          volumeMounts:
+            - name: seed-script
+              mountPath: /scripts
+          command:
+            - /bin/sh
+            - -c
+            - |
+              pip install pymongo==4.14.1 azure-storage-blob && python /scripts/init_db.py
+      volumes:
+        - name: seed-script
+          configMap:
+            name: seed-script

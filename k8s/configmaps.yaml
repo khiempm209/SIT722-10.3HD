@@ -13,3 +13,7 @@ data:
   MODEL_NAME: gemini-2.0-flash
   MONGO_DB_HOST: mongodb-service-hd
   CHATBOT_SERVICE_URL: http://chatbot-hd:3030
+
+  AZURE_STORAGE_ACCOUNT_NAME: sit722pmk
+  AZURE_STORAGE_CONTAINER_NAME: sit722pmk
+  AZURE_SAS_TOKEN_EXPIRY_HOURS: "24"

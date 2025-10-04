@@ -29,7 +29,7 @@ def driver():
     options.add_experimental_option("prefs", prefs)
     tmp_profile = tempfile.mkdtemp()
     options.add_argument(f"--user-data-dir={tmp_profile}")
-    # options.add_argument('--headless')
+    options.add_argument('--headless')
     drv = webdriver.Chrome(options=options)
     yield drv
     drv.quit()
