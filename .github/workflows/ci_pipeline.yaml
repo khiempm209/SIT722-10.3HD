@@ -10,7 +10,7 @@ on:
       - 'frontend/**'
       - 'chatbot/**'
       - '.github/workflows/ci_pipeline.yml' 
-
+###
 jobs:
   sonar-qube-scan:
     runs-on: ubuntu-latest
